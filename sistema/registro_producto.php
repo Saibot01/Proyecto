@@ -13,7 +13,7 @@
 		if(empty($_POST['Producto']) || empty($_POST['Cod_Barra']) || empty($_POST['cbx_tipoProducto']) || empty($_POST['cbx_seccion']) ||
 		empty($_POST['cbx_subseccion']) || empty($_POST['idCategoria']) || empty($_POST['activo']) ||
 		empty($_POST['impuesto']) || empty($_POST['observacion']) || empty($_POST['cbx_idMarca']) || empty($_POST['cbx_idMedida']) || 
-		empty($_POST['cbx_idBorde'])|| empty($_POST['cbx_idSabor']))		{
+		empty($_POST['cbx_idBorde']) || empty($_POST['cbx_idSabor']) || empty($_POST['Precio_Bruto']) || empty($_POST['pobservación']) )		{
 			$alert='<p class="msg_error">Todos los campos son obligatorios.</p>';
 		}else{
 			
@@ -30,6 +30,8 @@
 			$idMedida	= $_POST['cbx_idMedida'];
 			$idBorde   = $_POST['cbx_idBorde'];
 			$idSabor   = $_POST['cbx_idSabor'];
+			$precio_bruto = $_POST['Precio_Bruto'];
+			$pobservación = $_POST['pobservación'];
 
 
 			//$query = mysqli_query($conection,"SELECT * FROM productos WHERE usuario = '$user' OR correo = '$email' ");
@@ -53,6 +55,25 @@
 					$alert='<p class="msg_save">Tabla presentacion insertada correctamente.</p>';
 				}else{
 					$alert='<p class="msg_error">Error al insertar correctamente presentacion</p>';
+				}
+
+				//$query = "SELECT (max(idPrecio)+1) as idprecio FROM precio";
+				//$resultado=$conection->query($query);
+				//$idprecio = mysqli_query($conection,"SELECT (max(idPrecio)+1) FROM precio"); 
+				$query_insert_precio = mysqli_query($conection,"INSERT INTO precio (Cod_Barra, Precio_Bruto, Observación) 
+				VALUES ('$Cod_Barra','$precio_bruto','$pobservación')");
+				if($query_insert_precio){
+					$alert='<p class="msg_save">Tabla precio insertada correctamente.</p>';
+				}else{
+					$alert='<p class="msg_error">Error al insertar correctamente precio</p>';
+				}
+
+				$query_insert_preciocabecera = mysqli_query($conection,"INSERT INTO preciocabecera (idprecio, Fecha, Aprobado) 
+				VALUES ((SELECT (max(idprecio)) FROM precio),CURDATE(),0)");
+				if($query_insert_preciocabecera){
+					$alert='<p class="msg_save">Tabla preciocabecera insertada correctamente.</p>';
+				}else{
+					$alert='<p class="msg_error">Error al insertar correctamente preciocabecera</p>';
 				}
 			//}
 
@@ -210,7 +231,7 @@
 					$resultado=$conection->query($query);
 				?>
 				
-				<label for="cbx_idBorde">Medida</label>
+				<label for="cbx_idBorde">Borde</label>
 				<select name="cbx_idBorde" id="cbx_idBorde">
 				<option value="0">Seleccionar Borde</option>
 				<?php while($row = $resultado->fetch_assoc()) { ?>
@@ -234,7 +255,16 @@
 					<?php } ?>
 				</select> 
 				
+
+				<label for="Precio_Bruto">Precio</label>
+				<input type="text" name="Precio_Bruto" id="Precio_Bruto" placeholder="Precio Producto">
+
+				<label for="pobservación">Observación</label>
+				<input type="text" name="pobservación" id="pobservación" placeholder="Observación Precio">
+
+				
 				<input type="submit" value="Registrar nuevo producto" class="btn_save">
+				
 
 			</form>
 

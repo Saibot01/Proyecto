@@ -116,29 +116,74 @@
 			<div class="alert"><?php echo isset($alert) ? $alert : ''; ?></div>
 			
 			<form action="" method="post">
-			<input type="hidden" name="idProducto" value="<?php echo $idproducto; ?>">
-			<label for="Producto">Producto</label>
-				<input type="text" name="Producto" id="Producto" placeholder="Nombre Productocompleto" value="<?php echo $producto; ?>"> 
 
-				<label for="idTipoProducto">idTipoProducto</label>
-				<input type="text" name="idTipoProducto" id="idTipoProducto" placeholder="idTipoProducto" value="<?php echo $idtipoproducto; ?>">
 
-				<label for="idSección">idSección</label>
-				<input type="text" name="idSección" id="idSección" placeholder="id Sección" value="<?php echo $idseccion; ?>">
+				<label for="Producto">Producto</label>
+				<input type="text" name="Producto" id="Producto" placeholder="Nombre Productocompleto">
 
-				<label for="IdSubsección">idSubsección</label>
-				<input type="text" name="idSubsección" id="idSubsección" placeholder="idSubsección" value="<?php echo $idsubseccion; ?>">
+				<label for="Cod_Barra">Cod_Barra</label>
+				<input type="text" name="Cod_Barra" id="Cod_Barra" placeholder="Ingrese el codigo de barra correspondiente">
 
-				<label for="idCategoria">idCategoria</label>
+				<?php
+					require ('../conexion.php');
+					$querysec = "SELECT * FROM tipoproducto";
+					$resultadosec=$conection->query($querysec);
+				?>
+
+				<label for="cbx_tipoProducto">Tipo Producto</label>
+					<select name="cbx_tipoProducto" id="cbx_tipoProducto">
+				<option value="0">Seleccionar Tipo Producto</option>
+				<?php while($rowsec = $resultadosec->fetch_assoc()) { ?>
+					<option value="<?php echo $rowsec['idTipoProducto']; ?>"><?php echo $rowsec['Descripción']; ?></option>
+
+				<?php }	
+					 ?>
+
+				</select>
+				
+				<?php
+					require ('../conexion.php');
+					$querysec = "SELECT idsección, Descripción FROM sección";
+					$resultadosec=$conection->query($querysec);
+				?>
+
+				<label for="cbx_seccion">Sección : </label>
+					<select name="cbx_seccion" id="cbx_seccion">
+				<option value="0">Seleccionar Sección</option>
+				<?php while($rowsec = $resultadosec->fetch_assoc()) { ?>
+					<option value="<?php echo $rowsec['idsección']; ?>"><?php echo $rowsec['Descripción']; ?></option>
+
+				<?php }	
+					 ?>
+
+				</select>
+				<?php
+					require ('../conexion.php');
+					$query = "SELECT idSubsección, Descripción FROM subsección";
+					$resultado=$conection->query($query);
+				?>
+
+				<label for="cbx_subseccion">Subseccion : </label>
+				<select name="cbx_subseccion" id="cbx_subseccion">
+				<option value="0">Seleccionar Subsección</option>
+				<?php while($row = $resultado->fetch_assoc()) { ?>
+					<option value="<?php echo $row['idSubsección']; ?>"><?php echo $row['Descripción']; ?></option>
+				
+					<?php } ?>
+				</select>
+
+				<label for="idCategoria">Categoria</label>
+				
 				<?php 
-					include "../conexion.php";
+
 					$query_cat = mysqli_query($conection,"SELECT * FROM categoria");
 					mysqli_close($conection);
 					$result_cat = mysqli_num_rows($query_cat);
 
 				 ?>
 
-				<select name="idCategoria" id="idCategoria"class="notItemOne">
+				<select name="idCategoria" id="idCategoria">
+				<option value="0">Seleccionar Categoria</option>
 					<?php 
 						if($result_cat > 0)
 						{
@@ -153,15 +198,77 @@
 					 ?>
 				</select>
 
-				<label for="activo">activo</label>
-				<input type="text" name="activo" id="activo" placeholder="activo"value="<?php echo $activo; ?>">
+				<label for="activo">Activo</label>
+				<input type="text" name="activo" id="activo" placeholder="activo">
 
-				<label for="impuesto">impuesto</label>
-				<input type="text" name="impuesto" id="impuesto" placeholder="Inserte impuesto"value="<?php echo $impuesto; ?>">
+				<label for="impuesto">Impuesto</label>
+				<input type="text" name="impuesto" id="impuesto" placeholder="Inserte impuesto">
 
-				<label for="observacion">observacion</label>
-				<input type="text" name="observacion" id="observacion" placeholder="Inserte Observación"value="<?php echo $observacion; ?>">
-				<input type="submit" value="Actualizar Producto" class="btn_save">
+				<label for="observacion">Observacion</label>
+				<input type="text" name="observacion" id="observacion" placeholder="Inserte Observación">
+				
+
+				<?php
+					require ('../conexion.php');
+					$query = "SELECT idMarca, Descripción FROM Marca";
+					$resultado=$conection->query($query);
+				?>
+
+				<label for="cbx_idMarca">Marca</label>
+				<select name="cbx_idMarca" id="cbx_idMarca">
+				<option value="0">Seleccionar Marca</option>
+				<?php while($row = $resultado->fetch_assoc()) { ?>
+					<option value="<?php echo $row['idMarca']; ?>"><?php echo $row['Descripción']; ?></option>
+				
+					<?php } ?>
+				</select>
+				
+				<?php
+					require ('../conexion.php');
+					$query = "SELECT idMedida, Descripción FROM Medida";
+					$resultado=$conection->query($query);
+				?>
+				
+				<label for="cbx_idMedida">Medida</label>
+				<select name="cbx_idMedida" id="cbx_idMedida">
+				<option value="0">Seleccionar Medida</option>
+				<?php while($row = $resultado->fetch_assoc()) { ?>
+					<option value="<?php echo $row['idMedida']; ?>"><?php echo $row['Descripción']; ?></option>
+				
+					<?php } ?>
+				</select>
+
+				<?php
+					require ('../conexion.php');
+					$query = "SELECT idBorde, Descripción FROM borde";
+					$resultado=$conection->query($query);
+				?>
+				
+				<label for="cbx_idBorde">Borde</label>
+				<select name="cbx_idBorde" id="cbx_idBorde">
+				<option value="0">Seleccionar Borde</option>
+				<?php while($row = $resultado->fetch_assoc()) { ?>
+					<option value="<?php echo $row['idBorde']; ?>"><?php echo $row['Descripción']; ?></option>
+				
+					<?php } ?>
+				</select>
+
+
+				<?php
+					require ('../conexion.php');
+					$query = "SELECT idSabor, Descripción FROM Sabores";
+					$resultado=$conection->query($query);
+				?>
+				<label for="cbx_idSabor">Sabores</label>
+				<select name="cbx_idSabor" id="cbx_idSabor">
+				<option value="0">Seleccionar Sabor</option>
+				<?php while($row = $resultado->fetch_assoc()) { ?>
+					<option value="<?php echo $row['idSabor']; ?>"><?php echo $row['Descripción']; ?></option>
+				
+					<?php } ?>
+				</select> 
+				
+				<input type="submit" value="Registrar nuevo producto" class="btn_save">
 
 			</form>
 
