@@ -15,35 +15,32 @@
 <head>
 	<meta charset="UTF-8">
 	<?php include "includes/scripts.php"; ?>
-	<title>Lista de productos</title>
+	<title>Lista de usuarios</title>
 </head>
 <body>
 	<?php include "includes/header.php"; ?>
 	<section id="container">
 		
-		<h1>Lista de Producto</h1>
-		<a href="registro_producto.php" class="btn_new">Crear Producto</a>
+		<h1>Lista de usuarios</h1>
+		<a href="registro_usuario.php" class="btn_new">Crear usuario</a>
 		
-		<form action="buscar_producto.php" method="get" class="form_search">
+		<form action="buscar_usuario.php" method="get" class="form_search">
 			<input type="text" name="busqueda" id="busqueda" placeholder="Buscar">
 			<input type="submit" value="Buscar" class="btn_search">
 		</form>
 
 		<table>
 			<tr>
-				<th>Id</th>
-				<th>Cod Barra</th>
-				<th>Marca</th>
-				<th>Medida</th>
-				<th>Borde</th>
-				<th>Sabor</th>
-				<th>Precio</th>
+				<th>ID</th>
+				<th>Nombre</th>
+				<th>Correo</th>
+				<th>Usuario</th>
+				<th>Rol</th>
 				<th>Acciones</th>
-			
 			</tr>
 		<?php 
 			//Paginador
-			$sql_registe = mysqli_query($conection,"SELECT COUNT(*) as total_registro FROM presentaciones_producto ");
+			$sql_registe = mysqli_query($conection,"SELECT COUNT(*) as total_registro FROM usuario WHERE estatus = 1 ");
 			$result_register = mysqli_fetch_array($sql_registe);
 			$total_registro = $result_register['total_registro'];
 
@@ -59,16 +56,8 @@
 			$desde = ($pagina-1) * $por_pagina;
 			$total_paginas = ceil($total_registro / $por_pagina);
 
-			$query = mysqli_query($conection,"SELECT p.idProducto, p.Cod_Barra, m.Descripción as Marca, md.Descripción as Medida, b.Descripción as Borde, s.Descripción as Sabor, pr.Precio_Bruto as Precio
-			FROM presentaciones_producto p
-			INNER JOIN marca m ON m.idMarca = p.idMarca
-			JOIN medida md ON md.idMedida = p.idMedida
-			JOIN borde b ON b.idBorde = p.idBorde
-			JOIN sabores s ON s.idSabor = p.idSabor
-			JOIN precio pr ON pr.Cod_Barra = p.Cod_Barra
-			
-			
-			ORDER BY idProducto ASC LIMIT $desde,$por_pagina");
+			$query = mysqli_query($conection,"SELECT u.idusuario, u.nombre, u.correo, u.usuario, r.rol FROM usuario u INNER JOIN rol r ON u.rol = r.idrol WHERE estatus = 1 ORDER BY u.idusuario ASC LIMIT $desde,$por_pagina 
+				");
 
 			mysqli_close($conection);
 
@@ -79,19 +68,19 @@
 					
 			?>
 				<tr>
-					<td><?php echo $data["idProducto"]; ?></td>
-					<td><?php echo $data["Cod_Barra"]; ?></td>
-					<td><?php echo $data["Marca"]; ?></td>
-					<td><?php echo $data["Medida"]; ?></td>
-					<td><?php echo $data["Borde"]; ?></td>
-					<td><?php echo $data["Sabor"]; ?></td>
-					<td><?php echo $data["Precio"]; ?></td>
-					
-					
+					<td><?php echo $data["idusuario"]; ?></td>
+					<td><?php echo $data["nombre"]; ?></td>
+					<td><?php echo $data["correo"]; ?></td>
+					<td><?php echo $data["usuario"]; ?></td>
+					<td><?php echo $data['rol'] ?></td>
 					<td>
-						<a class="link_edit" href="editar_producto.php?id=<?php echo $data["idProducto"]; ?>">Editar</a>
-						<a class="link_delete" href="eliminar_confirmar_producto.php?id=<?php echo $data["idProducto"]; ?>">Eliminar</a>
+						<a class="link_edit" href="editar_usuario.php?id=<?php echo $data["idusuario"]; ?>">Editar</a>
 
+					<?php if($data["idusuario"] != 1){ ?>
+						|
+						<a class="link_delete" href="eliminar_confirmar_usuario.php?id=<?php echo $data["idusuario"]; ?>">Eliminar</a>
+					<?php } ?>
+						
 					</td>
 				</tr>
 			
