@@ -1,13 +1,12 @@
 <?php 
-	
 	session_start();
 	if($_SESSION['rol'] != 1)
 	{
 		header("location: ./");
 	}
+	
+	include "../conexion.php"; 
 
-	include "../conexion.php";
- 
 	if(!empty($_POST))
 	{
 		$alert='';
@@ -18,7 +17,6 @@
 			$alert='<p class="msg_error">Todos los campos son obligatorios.</p>';
 		}else{
 			
-			$idproducto = $_POST['idProducto'];
 			$producto = $_POST['Producto'];
 			$Cod_Barra = $_POST['Cod_Barra'];
 			$idtipoproducto  = $_POST['cbx_tipoProducto'];
@@ -36,123 +34,55 @@
 			$pobservación = $_POST['pobservación'];
 
 
-			/*$query = mysqli_query($conection,"SELECT * FROM productos 
-													   WHERE (Producto = '$producto')");
-			$result = mysqli_fetch_array($query);
-			if($result > 0){
-				$alert='<p class="msg_error">Producto ya existe.</p>';
-			}else{*/
+			//$query = mysqli_query($conection,"SELECT * FROM productos WHERE usuario = '$user' OR correo = '$email' ");
+			//$result = mysqli_fetch_array($query);
 
-				if(empty($_POST['id']))
-				{
+			//if($result > 0){
+			//	$alert='<p class="msg_error">El correo o el usuario ya existe.</p>';
+			//}else{
 
-					$sql_update_producto = mysqli_query($conection,"UPDATE productos
-															SET Producto = '$producto', idTipoProducto='$idtipoproducto',idSección='$idseccion',idSubsección='$idsubseccion', idCategoria= '$idcategoria', activo= '$activo', impuesto= '$impuesto', observación = '$observacion' 
-										/*Revisar*/			WHERE idProducto= $idproducto ");
-				}
-
-				if($sql_update_producto){
-					$alert='<p class="msg_save">Producto actualizado correctamente.</p>';
+				$query_insert_product = mysqli_query($conection,"INSERT INTO productos (Producto, idTipoProducto, idSección, idSubsección, idCategoria, activo, observación, impuesto) 
+				VALUES ('$producto','$idtipoproducto','$idseccion','$idsubseccion','$idcategoria','$activo','$observacion','$impuesto')");
+				if($query_insert_product){
+					$alert='<p class="msg_save"> tabla Producto insertada correctamente.</p>';
 				}else{
-					$alert='<p class="msg_error">Error al actualizar el Producto.</p>';
+					$alert='<p class="msg_error">Error al crear el Producto.</p>';
 				}
 
-				if(empty($_POST['id']))
-				{
-
-					$sql_update_presentacion = mysqli_query($conection,"UPDATE presentaciones_producto 
-					SET idMarca = '$idMarca', idMedida= '$idMedida', idBorde= '$idBorde', idSabor= '$idSabor
-					WHERE Cod_Barra= $Cod_Barra");
-										
-				}
-
-				if($sql_update_presentacion){
-					$alert='<p class="msg_save">Presentaciones Producto actualizado correctamente.</p>';
+				$query_insert_presentacion = mysqli_query($conection,"INSERT INTO presentaciones_producto (idProducto, Cod_Barra, idMarca, idMedida, idBorde, idSabor) 
+				VALUES ((SELECT max(idproducto) FROM productos),'$Cod_Barra','$idMarca','$idMedida','$idBorde','$idSabor')");
+				if($query_insert_presentacion){
+					$alert='<p class="msg_save">Tabla presentacion insertada correctamente.</p>';
 				}else{
-					$alert='<p class="msg_error">Error al actualizar el Presentaciones Producto.</p>';
-				}
-				if(empty($_POST['id']))
-				{
-
-					$sql_update_precio = mysqli_query($conection,"UPDATE precio
-					SET  Precio_Bruto = '$precio_bruto', Observación = '$pobservación' 
-					WHERE Cod_Barra= $Cod_Barra");
-										
+					$alert='<p class="msg_error">Error al insertar correctamente presentacion</p>';
 				}
 
-				if($sql_update_precio){
-					$alert='<p class="msg_save">Precio actualizado correctamente.</p>';
+				//$query = "SELECT (max(idPrecio)+1) as idprecio FROM precio";
+				//$resultado=$conection->query($query);
+				//$idprecio = mysqli_query($conection,"SELECT (max(idPrecio)+1) FROM precio"); 
+				$query_insert_precio = mysqli_query($conection,"INSERT INTO precio (Cod_Barra, Precio_Bruto, Observación) 
+				VALUES ('$Cod_Barra','$precio_bruto','$pobservación')");
+				if($query_insert_precio){
+					$alert='<p class="msg_save">Tabla precio insertada correctamente.</p>';
 				}else{
-					$alert='<p class="msg_error">Error al actualizar el Precio.</p>';
+					$alert='<p class="msg_error">Error al insertar correctamente precio</p>';
 				}
 
-			}
+				$query_insert_preciocabecera = mysqli_query($conection,"INSERT INTO preciocabecera (idprecio, Fecha, Aprobado) 
+				VALUES ((SELECT (max(idprecio)) FROM precio),CURDATE(),0)");
+				if($query_insert_preciocabecera){
+					$alert='<p class="msg_save">Tabla preciocabecera insertada correctamente.</p>';
+				}else{
+					$alert='<p class="msg_error">Error al insertar correctamente preciocabecera</p>';
+				}
+			//}
 
 
 		}
 
-	//}
-
-	//Mostrar Datos
-	if(empty($_REQUEST['id']))
-	{
-		header('Location: lista_producto.php');
-		mysqli_close($conection);
 	}
-	$idproducto = $_REQUEST['id'];
-
-	$sql= mysqli_query($conection,"SELECT p.idProducto, p.Producto, pro.Cod_Barra, tp.Descripción AS TipoProducto,
-	s.Descripción AS Sección, sub.Descripción AS Subsección, c.Descripción AS Categoría,
-	 activo, p.observación, impuesto,m.Descripción AS Marca, md.Descripción AS Medida,
-	  b.Descripción AS Borde, s.Descripción AS Sabor, pr.Precio_Bruto AS Precio, pr.Observación AS pObservación 
-			   FROM productos p  
-			   INNER JOIN categoria c ON c.idCategoria = p.idCategoria
-			   JOIN subsección sub ON	sub.idSubSección = p.idSubSección
-			   JOIN sección se	ON se.idSección = p.idSección
-			   JOIN tipoproducto tp ON tp.idTipoProducto = p.idTipoProducto
-			   JOIN presentaciones_producto pro ON pro.idProducto = p.idProducto
-			   JOIN marca m ON m.idMarca = pro.idMarca
-			   JOIN medida md ON md.idMedida = pro.idMedida
-			   JOIN borde b ON b.idBorde = pro.idBorde
-			   JOIN sabores s ON s.idSabor = pro.idSabor
-			   JOIN precio pr ON pr.Cod_Barra = pro.Cod_Barra
-	WHERE p.idProducto= $idproducto ");
-	mysqli_close($conection);
-	$result_sql = mysqli_num_rows($sql);
-
-	if($result_sql == 0){
-		header('Location: lista_producto.php');
-	}else{
-		$option = '';
-		while ($data = mysqli_fetch_array($sql)) {
-			# code...
-			$producto = $data['Producto'];
-			$Cod_Barra = $data['Cod_Barra'];
-			$idtipoproducto  = $data['TipoProducto'];
-			$idseccion   = $data['Sección'];
-			$idsubseccion  = $data['Subsección'];
-			$idcategoria    = $data['Categoría'];
-			$activo    = $data['activo'];
-			$observacion    = $data['observación'];
-			$impuesto    = $data['impuesto'];
-			$idMarca   = $data['Marca'];
-			$idMedida	= $data['Medida'];
-			$idBorde   = $data['Borde'];
-			$idSabor   = $data['Sabor'];
-			$precio_bruto = $data['Precio'];
-			$pobservación = $data['pObservación'];
-
-			/*if($idrol == 1){
-				$option = '<option value="'.$idrol.'" select>'.$rol.'</option>';
-			}else if($idrol == 2){
-				$option = '<option value="'.$idrol.'" select>'.$rol.'</option>';	
-			}else if($idrol == 3){
-				$option = '<option value="'.$idrol.'" select>'.$rol.'</option>';
-			}*/
 
 
-		}
-	}
 
  ?>
 
@@ -161,32 +91,25 @@
 <head>
 	<meta charset="UTF-8">
 	<?php include "includes/scripts.php"; ?>
-	<title>Actualizar Usuario</title>
+	<title>Registro Producto</title>
 </head>
 <body>
 	<?php include "includes/header.php"; ?>
 	<section id="container">
 		
 		<div class="form_register">
-			<h1>Actualizar Producto</h1>
+			<h1>Registro Producto</h1>
 			<hr>
 			<div class="alert"><?php echo isset($alert) ? $alert : ''; ?></div>
-			
+
 			<form action="" method="post">
 
 
 				<label for="Producto">Producto</label>
-
-				<input type="text" name="Producto" id="Producto" placeholder="Nombre Productocompleto" value="<?php echo $producto; ?>">
-
-				<label for="Cod_Barra">Cod_Barra</label>
-				<input type="text" name="Cod_Barra" id="Cod_Barra" placeholder="Ingrese el codigo de barra correspondiente"value="<?php echo $Cod_Barra; ?>">
-
 				<input type="text" name="Producto" id="Producto" placeholder="Nombre Productocompleto">
 
 				<label for="Cod_Barra">Cod_Barra</label>
 				<input type="text" name="Cod_Barra" id="Cod_Barra" placeholder="Ingrese el codigo de barra correspondiente">
-
 
 				<?php
 					require ('../conexion.php');
@@ -196,11 +119,7 @@
 
 				<label for="cbx_tipoProducto">Tipo Producto</label>
 					<select name="cbx_tipoProducto" id="cbx_tipoProducto">
-
-				<option value="0"> <?php echo $idtipoproducto; ?> </option>
-
 				<option value="0">Seleccionar Tipo Producto</option>
-
 				<?php while($rowsec = $resultadosec->fetch_assoc()) { ?>
 					<option value="<?php echo $rowsec['idTipoProducto']; ?>"><?php echo $rowsec['Descripción']; ?></option>
 
@@ -267,62 +186,6 @@
 				</select>
 
 				<label for="activo">Activo</label>
-
-				<input type="text" name="activo" id="activo" placeholder="activo"value="<?php echo $activo; ?> ">
-
-				<label for="impuesto">Impuesto</label>
-				<input type="text" name="impuesto" id="impuesto" placeholder="Inserte impuesto"value="<?php echo $impuesto; ?>">
-
-				<label for="observacion">Observacion</label>
-				<input type="text" name="observacion" id="observacion" placeholder="Inserte Observación" value="<?php echo $observacion; ?>">
-				
-
-				<?php
-					require ('../conexion.php');
-					$query = "SELECT idMarca, Descripción FROM Marca";
-					$resultado=$conection->query($query);
-				?>
-
-				<label for="cbx_idMarca">Marca</label>
-				<select name="cbx_idMarca" id="cbx_idMarca">
-				<option value="0">Seleccionar Marca</option>
-				<?php while($row = $resultado->fetch_assoc()) { ?>
-					<option value="<?php echo $row['idMarca']; ?>"><?php echo $row['Descripción']; ?></option>
-				
-					<?php } ?>
-				</select>
-				
-				<?php
-					require ('../conexion.php');
-					$query = "SELECT idMedida, Descripción FROM Medida";
-					$resultado=$conection->query($query);
-				?>
-				
-				<label for="cbx_idMedida">Medida</label>
-				<select name="cbx_idMedida" id="cbx_idMedida">
-				<option value="0">Seleccionar Medida</option>
-				<?php while($row = $resultado->fetch_assoc()) { ?>
-					<option value="<?php echo $row['idMedida']; ?>"><?php echo $row['Descripción']; ?></option>
-				
-					<?php } ?>
-				</select>
-
-				<?php
-					require ('../conexion.php');
-					$query = "SELECT idBorde, Descripción FROM borde";
-					$resultado=$conection->query($query);
-				?>
-				
-				<label for="cbx_idBorde">Borde</label>
-				<select name="cbx_idBorde" id="cbx_idBorde">
-				<option value="0">Seleccionar Borde</option>
-				<?php while($row = $resultado->fetch_assoc()) { ?>
-					<option value="<?php echo $row['idBorde']; ?>"><?php echo $row['Descripción']; ?></option>
-				
-					<?php } ?>
-				</select>
-
-
 				<input type="text" name="activo" id="activo" placeholder="activo">
 
 				<label for="impuesto">Impuesto</label>
@@ -378,7 +241,6 @@
 				</select>
 
 
-
 				<?php
 					require ('../conexion.php');
 					$query = "SELECT idSabor, Descripción FROM Sabores";
@@ -393,20 +255,20 @@
 					<?php } ?>
 				</select> 
 				
+
 				<label for="Precio_Bruto">Precio</label>
-				<input type="text" name="Precio_Bruto" id="Precio_Bruto" placeholder="Precio Producto" value="<?php echo $precio_bruto; ?>">
+				<input type="text" name="Precio_Bruto" id="Precio_Bruto" placeholder="Precio Producto">
 
 				<label for="pobservación">Observación</label>
-				<input type="text" name="pobservación" id="pobservación" placeholder="Observación Precio" value="<?php echo $pobservación; ?>">
+				<input type="text" name="pobservación" id="pobservación" placeholder="Observación Precio">
 
-
+				
 				<input type="submit" value="Registrar nuevo producto" class="btn_save">
+				
 
 			</form>
 
-
 		</div>
-
 
 	</section>
 	<?php include "includes/footer.php"; ?>
